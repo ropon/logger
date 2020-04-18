@@ -7,9 +7,8 @@ import (
 
 var Log Logger
 
-func InitLog() {
-	Log = NewFileLogger("Info", "./", "niuPi")
-	go FileLog()
+func InitLog(level, fileName string) {
+	Log = NewFileLogger(level, "./log", fileName, false)
 }
 
 func Close() {
