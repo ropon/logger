@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"runtime"
 	"time"
 )
 
 var (
-	maxSize      int64   = 10 * 1024 * 1024
-	maxChanCount int64   = 50000
-	timeDr       float64 = 2
+	maxChanCount int64 = 50000
 )
 
 // FileLogger 日志结构体
@@ -23,6 +22,7 @@ type fileLogger struct {
 	maxSize   int64
 	lastTime  time.Time
 	splitFlag bool
+	timeDr    float64
 }
 
 //LogMsg 定义日志信息结构体
@@ -37,33 +37,45 @@ type logMsg struct {
 var logChan = make(chan *logMsg, maxChanCount)
 
 // NewFileLogger 日志结构体 构造函数
-func NewFileLogger(level, filePath, fileName string, splitFlag bool) *fileLogger {
+func NewFileLogger(logCfg *LogCfg) (*fileLogger, error) {
 	fileLogger := &fileLogger{
-		level:     level,
-		filePath:  filePath,
-		fileName:  fileName + ".log",
-		maxSize:   maxSize,
+		level:     logCfg.Level,
+		filePath:  logCfg.FilePath,
+		fileName:  logCfg.FileName,
+		maxSize:   logCfg.MaxSize,
 		lastTime:  time.Now(),
-		splitFlag: splitFlag,
+		splitFlag: logCfg.SplitFlag,
+		timeDr:    logCfg.TimeDr,
 	}
-	_ = fileLogger.initFile()
+	//判断日志目录是否存在
+	_, err := os.Stat(logCfg.FilePath)
+	isExistFlag := err == nil || os.IsExist(err)
+	if !isExistFlag {
+		err := os.MkdirAll(logCfg.FilePath, 0744)
+		if err != nil {
+			return fileLogger, err
+		}
+	}
+	err = fileLogger.initFile()
 	//启动协程将日志写入文件中
 	go fileLogger.FileLog()
-	return fileLogger
+	return fileLogger, err
 }
 
 //新建日志文件
 func (f *fileLogger) initFile() error {
 	logName := path.Join(f.filePath, f.fileName)
+	fmt.Println(logName)
 	fileObj, err := os.OpenFile(logName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("打开日志文件%s异常, 报错:%v", logName, err)
 	}
 	f.file = fileObj
-	errLogName := fmt.Sprintf("err_%s", logName)
+	errLogName := fmt.Sprintf("%s.err", logName)
+	fmt.Println(errLogName)
 	errFileObj, err := os.OpenFile(errLogName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		return fmt.Errorf("打开日志文件%s异常, 报错:%v", errLogName, err)
+		return fmt.Errorf("打开错误日志文件%s异常, 报错:%v", errLogName, err)
 	}
 	f.errFile = errFileObj
 	return nil
@@ -77,7 +89,7 @@ func (f *fileLogger) wLog(level string, format string, args ...interface{}) {
 	msgInfo := fmt.Sprintf(format, args...)
 	nowStr := time.Now().Local().Format("2006-01-02 15:04:05.000")
 	funcName, fileName, line, _ := getCallerInfo(4)
-	msg := fmt.Sprintf("[%s] [%s] [%s:%s] %d %s", nowStr, level, fileName, funcName, line, msgInfo)
+	msg := fmt.Sprintf("[%s] [%s] [%s:%s] %d [grn:%d] %s", nowStr, level, fileName, funcName, line, runtime.NumGoroutine(), msgInfo)
 	//将日志信息发送通道
 	logMsgTemp := &logMsg{
 		file:    f.file,
@@ -92,7 +104,7 @@ func (f *fileLogger) wLog(level string, format string, args ...interface{}) {
 	}
 }
 
-//将日志写入文件
+// FileLog 将日志写入文件
 func (f *fileLogger) FileLog() {
 	for {
 		//检查拆分日志
@@ -105,9 +117,9 @@ func (f *fileLogger) FileLog() {
 				_, _ = fmt.Fprintln(logMsg.errFile, logMsg.msg)
 				switch getLevel(logMsg.level) {
 				case getLevel("ERROR"):
-					os.Exit(1)
+					//os.Exit(1)
 				case getLevel("FATAL"):
-					panic(logMsg.msg)
+					//panic(logMsg.msg)
 				}
 			}
 		default:
@@ -118,7 +130,7 @@ func (f *fileLogger) FileLog() {
 
 func reCrFile(file *os.File) *os.File {
 	fileName := file.Name()
-	backupName := fmt.Sprintf("%s_bak%v", fileName, time.Now().Unix())
+	backupName := fmt.Sprintf("%s_%v", fileName, time.Now().Local().Format("2006-01-02 15:04:05.000"))
 	_ = file.Close()
 	_ = os.Rename(fileName, backupName)
 	fileObj, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
@@ -131,9 +143,9 @@ func reCrFile(file *os.File) *os.File {
 //日志拆分
 func (f *fileLogger) checkSplitLog() {
 	if f.splitFlag {
-		// 按时间拆分 2小时拆分1次
+		// 按时间拆分
 		timeD := time.Now().Sub(f.lastTime).Minutes()
-		if timeD >= timeDr {
+		if timeD >= f.timeDr {
 			f.file = reCrFile(f.file)
 			f.errFile = reCrFile(f.errFile)
 			f.lastTime = time.Now()

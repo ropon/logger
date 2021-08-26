@@ -7,8 +7,34 @@ import (
 
 var Log Logger
 
-func InitLog(level, fileName string) {
-	Log = NewFileLogger(level, "./log", fileName, false)
+type LogCfg struct {
+	Level     string
+	FilePath  string
+	FileName  string
+	MaxSize   int64
+	SplitFlag bool
+	TimeDr    float64
+}
+
+var defaultLogCfg = LogCfg{
+	Level:    "debug",
+	FilePath: "./log",
+	FileName: "log.log",
+}
+
+func InitLog(logCfgS ...*LogCfg) (err error) {
+	logCfg := &defaultLogCfg
+	if len(logCfgS) == 1 {
+		logCfg = logCfgS[0]
+	}
+	if logCfg.MaxSize == 0 {
+		logCfg.MaxSize = 1024 * 1024 * 1024
+	}
+	if logCfg.SplitFlag && logCfg.TimeDr == 0 {
+		logCfg.TimeDr = 2 * 60
+	}
+	Log, err = NewFileLogger(logCfg)
+	return
 }
 
 func Close() {
@@ -23,7 +49,6 @@ func ErrorExit(err error) {
 	}
 }
 
-//再次封装
 func Debug(format string, args ...interface{}) {
 	Log.Debug(format, args...)
 }

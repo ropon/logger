@@ -1,3 +1,3 @@
-module logger
+module "github.com/ropon/logger"
 
-go 1.13
+go 1.14
