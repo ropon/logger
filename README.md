@@ -19,7 +19,7 @@ go get -u github.com/ropon/logger
 
 ```go
 func main() {
-logger.InitLog()
-logger.Info("这是一条信息日志")
+    logger.InitLog()
+    logger.Info("这是一条信息日志")
 }
 ```
