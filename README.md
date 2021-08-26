@@ -9,9 +9,17 @@
 
 ### 使用方法
 
+```
+go get -u github.com/ropon/logger
+```
+
+-------
+
+### 使用方法
+
 ```go
 func main() {
-    logger.InitLog()
-    logger.Info("这是一条信息日志")
+logger.InitLog()
+logger.Info("这是一条信息日志")
 }
 ```
