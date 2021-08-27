@@ -20,6 +20,7 @@ type Logger interface {
 	Warn(format string, args ...interface{})
 	Error(format string, args ...interface{})
 	Fatal(format string, args ...interface{})
+	Print(args ...interface{})
 	Close()
 }
 
@@ -30,4 +31,3 @@ func getLevel(level string) int {
 	//map取不到返回对应类型零值
 	return logLevelMap[level]
 }
-

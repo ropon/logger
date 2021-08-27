@@ -190,6 +190,10 @@ func (f *fileLogger) Fatal(format string, args ...interface{}) {
 	f.wLog("FATAL", format, args...)
 }
 
+func (f *fileLogger) Print(args ...interface{}) {
+	f.wLog("DEBUG", "%s", args...)
+}
+
 // Close 关闭文件句柄
 func (f *fileLogger) Close() {
 	time.Sleep(time.Millisecond * 500)

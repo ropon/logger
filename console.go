@@ -56,6 +56,10 @@ func (f *ConsoleLogger) Fatal(format string, args ...interface{}) {
 	f.wLog("FATAL", format, args...)
 }
 
+func (f *ConsoleLogger) Print(args ...interface{}) {
+	f.wLog("DEBUG", "%s", args...)
+}
+
 // Close 终端不需要关闭
 func (f *ConsoleLogger) Close() {
 
