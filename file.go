@@ -65,14 +65,12 @@ func NewFileLogger(logCfg *LogCfg) (*fileLogger, error) {
 //新建日志文件
 func (f *fileLogger) initFile() error {
 	logName := path.Join(f.filePath, f.fileName)
-	fmt.Println(logName)
 	fileObj, err := os.OpenFile(logName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("打开日志文件%s异常, 报错:%v", logName, err)
 	}
 	f.file = fileObj
 	errLogName := fmt.Sprintf("%s.err", logName)
-	fmt.Println(errLogName)
 	errFileObj, err := os.OpenFile(errLogName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("打开错误日志文件%s异常, 报错:%v", errLogName, err)
@@ -191,7 +189,8 @@ func (f *fileLogger) Fatal(format string, args ...interface{}) {
 }
 
 func (f *fileLogger) Print(args ...interface{}) {
-	f.wLog("DEBUG", "%s", args...)
+	s := fmt.Sprint(args...)
+	f.wLog("DEBUG", "%s", s)
 }
 
 // Close 关闭文件句柄

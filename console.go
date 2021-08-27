@@ -57,7 +57,8 @@ func (f *ConsoleLogger) Fatal(format string, args ...interface{}) {
 }
 
 func (f *ConsoleLogger) Print(args ...interface{}) {
-	f.wLog("DEBUG", "%s", args...)
+	s := fmt.Sprint(args...)
+	f.wLog("DEBUG", "%s", s)
 }
 
 // Close 终端不需要关闭
