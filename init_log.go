@@ -64,3 +64,11 @@ func Warn(format string, args ...interface{}) {
 func Error(format string, args ...interface{}) {
 	Log.Error(format, args...)
 }
+
+func Fatal(format string, args ...interface{}) {
+	Log.Fatal(format, args...)
+}
+
+func Panic(format string, args ...interface{}) {
+	Log.Panic(format, args...)
+}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -70,7 +71,7 @@ func (f *fileLogger) initFile() error {
 		return fmt.Errorf("打开日志文件%s异常, 报错:%v", logName, err)
 	}
 	f.file = fileObj
-	errLogName := fmt.Sprintf("%s.err", logName)
+	errLogName := fmt.Sprintf("%s.wf", logName)
 	errFileObj, err := os.OpenFile(errLogName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("打开错误日志文件%s异常, 报错:%v", errLogName, err)
@@ -87,7 +88,9 @@ func (f *fileLogger) wLog(level string, format string, args ...interface{}) {
 	msgInfo := fmt.Sprintf(format, args...)
 	nowStr := time.Now().Local().Format("2006-01-02 15:04:05.000")
 	funcName, fileName, line, _ := getCallerInfo(4)
-	msg := fmt.Sprintf("[%s] [%s] [%s:%s] %d [grn:%d] %s", nowStr, level, fileName, funcName, line, runtime.NumGoroutine(), msgInfo)
+	colorStr := colorMap[strings.ToLower(level)]
+	baseInfo := fmt.Sprintf("%s:%s [grn:%d] [%s:%s:%d]", level, nowStr, runtime.NumGoroutine(), fileName, funcName, line)
+	msg := fmt.Sprintf(colorStr+" %s", baseInfo, msgInfo)
 	//将日志信息发送通道
 	logMsgTemp := &logMsg{
 		file:    f.file,
@@ -104,6 +107,8 @@ func (f *fileLogger) wLog(level string, format string, args ...interface{}) {
 
 // FileLog 将日志写入文件
 func (f *fileLogger) FileLog() {
+	defer f.file.Sync()
+	defer f.errFile.Sync()
 	for {
 		//检查拆分日志
 		f.checkSplitLog()
@@ -111,13 +116,13 @@ func (f *fileLogger) FileLog() {
 		case logMsg := <-logChan:
 			//将日志写入文件
 			_, _ = fmt.Fprintln(logMsg.file, logMsg.msg)
-			if getLevel(logMsg.level) >= getLevel("ERROR") {
+			if getLevel(logMsg.level) >= getLevel("ERRO") {
 				_, _ = fmt.Fprintln(logMsg.errFile, logMsg.msg)
 				switch getLevel(logMsg.level) {
-				case getLevel("ERROR"):
-					//os.Exit(1)
 				case getLevel("FATAL"):
-					//panic(logMsg.msg)
+					os.Exit(1)
+				case getLevel("PANIC"):
+					panic(logMsg.msg)
 				}
 			}
 		default:
@@ -180,12 +185,16 @@ func (f *fileLogger) Warn(format string, args ...interface{}) {
 
 // Error 错误日志
 func (f *fileLogger) Error(format string, args ...interface{}) {
-	f.wLog("ERROR", format, args...)
+	f.wLog("ERRO", format, args...)
 }
 
 // Fatal 严重错误日志
 func (f *fileLogger) Fatal(format string, args ...interface{}) {
 	f.wLog("FATAL", format, args...)
+}
+
+func (f *fileLogger) Panic(format string, args ...interface{}) {
+	f.wLog("PANIC", format, args...)
 }
 
 func (f *fileLogger) Print(args ...interface{}) {
@@ -195,7 +204,6 @@ func (f *fileLogger) Print(args ...interface{}) {
 
 // Close 关闭文件句柄
 func (f *fileLogger) Close() {
-	time.Sleep(time.Millisecond * 500)
 	_ = f.file.Close()
 	_ = f.errFile.Close()
 }
