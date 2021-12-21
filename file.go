@@ -89,7 +89,7 @@ func (f *fileLogger) wLog(level string, format string, args ...interface{}) {
 	nowStr := time.Now().Local().Format("2006-01-02 15:04:05.000")
 	funcName, fileName, line, _ := getCallerInfo(4)
 	colorStr := colorMap[strings.ToLower(level)]
-	baseInfo := fmt.Sprintf("%s:%s [grn:%d] [%s:%s:%d]", level, nowStr, runtime.NumGoroutine(), fileName, funcName, line)
+	baseInfo := fmt.Sprintf("%s:%s [grn:%d] %s:%d [%s]", level, nowStr, runtime.NumGoroutine(), fileName, line, funcName)
 	msg := fmt.Sprintf(colorStr+" %s", baseInfo, msgInfo)
 	//将日志信息发送通道
 	logMsgTemp := &logMsg{

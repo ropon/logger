@@ -19,8 +19,8 @@ const (
 	YellowBold  = "\033[33;1m"
 )
 
-//logLevelMap 定义日志级别map
 var (
+	//logLevelMap 定义日志级别map
 	logLevelMap = map[string]int{
 		"debug": 0,
 		"info":  1,
@@ -30,14 +30,48 @@ var (
 		"panic": 5,
 	}
 	colorMap = map[string]string{
-		"debug": Cyan + "%s" + Reset,
+		"debug": Blue + "%s" + Reset,
 		"info":  Green + "%s" + Reset,
 		"warn":  Yellow + "%s" + Reset,
 		"erro":  Red + "%s" + Reset,
 		"fatal": RedBold + "%s" + Reset,
-		"panic": "%s",
+		"panic": YellowBold + "%s" + Reset,
 	}
 )
+
+func ColorForStatus(code int) string {
+	switch {
+	case code >= 200 && code <= 299:
+		return Green
+	case code >= 300 && code <= 399:
+		return White
+	case code >= 400 && code <= 499:
+		return Yellow
+	default:
+		return Red
+	}
+}
+
+func ColorForMethod(method string) string {
+	switch {
+	case method == "GET":
+		return Blue
+	case method == "POST":
+		return Cyan
+	case method == "PUT":
+		return Yellow
+	case method == "DELETE":
+		return Red
+	case method == "PATCH":
+		return Green
+	case method == "HEAD":
+		return Magenta
+	case method == "OPTIONS":
+		return White
+	default:
+		return Reset
+	}
+}
 
 //Logger 是一个日志接口
 type Logger interface {

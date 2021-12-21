@@ -30,8 +30,8 @@ func main() {
 		logger.Info("这是一条Info日志")
 		logger.Warn("这是一条warn日志")
 		logger.Error("这是一条error日志 %s", "问题这么严重 。。。。")
-		//logger.Fatal("这是一条fatal日志")
 		//logger.Panic("这是一条panic日志")
+		logger.Fatal("这是一条fatal日志")
 		time.Sleep(time.Second)
 	}
 	select {}
