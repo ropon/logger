@@ -1,6 +1,8 @@
 package logger
 
-import "strings"
+import (
+	"strings"
+)
 
 //日志库
 
@@ -37,39 +39,47 @@ var (
 		"fatal": RedBold + "%s" + Reset,
 		"panic": YellowBold + "%s" + Reset,
 	}
+	green   = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
+	white   = string([]byte{27, 91, 57, 48, 59, 52, 55, 109})
+	yellow  = string([]byte{27, 91, 57, 55, 59, 52, 51, 109})
+	red     = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
+	blue    = string([]byte{27, 91, 57, 55, 59, 52, 52, 109})
+	magenta = string([]byte{27, 91, 57, 55, 59, 52, 53, 109})
+	cyan    = string([]byte{27, 91, 57, 55, 59, 52, 54, 109})
+	reset   = string([]byte{27, 91, 48, 109})
 )
 
 func ColorForStatus(code int) string {
 	switch {
 	case code >= 200 && code <= 299:
-		return Green
+		return green
 	case code >= 300 && code <= 399:
-		return White
+		return white
 	case code >= 400 && code <= 499:
-		return Yellow
+		return yellow
 	default:
-		return Red
+		return red
 	}
 }
 
 func ColorForMethod(method string) string {
 	switch {
 	case method == "GET":
-		return Blue
+		return blue
 	case method == "POST":
-		return Cyan
+		return cyan
 	case method == "PUT":
-		return Yellow
+		return yellow
 	case method == "DELETE":
-		return Red
+		return red
 	case method == "PATCH":
-		return Green
+		return green
 	case method == "HEAD":
-		return Magenta
+		return magenta
 	case method == "OPTIONS":
-		return White
+		return white
 	default:
-		return Reset
+		return reset
 	}
 }
 
