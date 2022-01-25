@@ -1,10 +1,5 @@
 package logger
 
-import (
-	"fmt"
-	"time"
-)
-
 var Log Logger
 
 type LogCfg struct {
@@ -39,14 +34,6 @@ func InitLog(logCfgS ...*LogCfg) (err error) {
 
 func Close() {
 	Log.Close()
-}
-
-func ErrorExit(err error) {
-	if err != nil {
-		fmt.Println(err.Error())
-		Log.Error(err.Error())
-		time.Sleep(time.Millisecond * 500)
-	}
 }
 
 func Debug(format string, args ...interface{}) {
