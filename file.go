@@ -125,8 +125,6 @@ func (f *fileLogger) FileLog() {
 					panic(logMsg.msg)
 				}
 			}
-		default:
-			time.Sleep(time.Microsecond * 50)
 		}
 	}
 }
