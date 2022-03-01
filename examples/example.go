@@ -29,9 +29,9 @@ func main() {
 		logger.Debug("这是一条debug日志，我的名字是：%s，年龄：%d", "Ropon", 18)
 		logger.Info("这是一条Info日志")
 		logger.Warn("这是一条warn日志")
-		logger.Error("这是一条error日志 %s", "问题这么严重 。。。。")
+		//logger.Error("这是一条error日志 %s", "问题这么严重 。。。。")
 		//logger.Panic("这是一条panic日志")
-		logger.Fatal("这是一条fatal日志")
+		//logger.Fatal("这是一条fatal日志")
 		time.Sleep(time.Second)
 	}
 	select {}
