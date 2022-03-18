@@ -98,6 +98,8 @@ func (f *fileLogger) wLog(level string, format string, args ...interface{}) {
 		level:   level,
 		msg:     msg,
 	}
+	defer f.file.Sync()
+	defer f.errFile.Sync()
 	select {
 	case logChan <- logMsgTemp:
 	default:
