@@ -3,12 +3,12 @@ package logger
 var Log Logger
 
 type LogCfg struct {
-	Level     string
-	FilePath  string
-	FileName  string
-	MaxSize   int64
-	SplitFlag bool
-	TimeDr    float64
+	Level     string  `json:"level"`
+	FilePath  string  `json:"file_path"`
+	FileName  string  `json:"file_name"`
+	MaxSize   int64   `json:"max_size"`
+	SplitFlag bool    `json:"split_flag"`
+	TimeDr    float64 `json:"time_dr"`
 }
 
 var defaultLogCfg = LogCfg{
