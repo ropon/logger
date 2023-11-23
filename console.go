@@ -56,6 +56,10 @@ func (f *ConsoleLogger) Fatal(format string, args ...interface{}) {
 	f.wLog("FATAL", format, args...)
 }
 
+func (f *ConsoleLogger) Panic(format string, args ...interface{}) {
+	f.wLog("PANIC", format, args...)
+}
+
 func (f *ConsoleLogger) Print(args ...interface{}) {
 	s := fmt.Sprint(args...)
 	f.wLog("DEBUG", "%s", s)

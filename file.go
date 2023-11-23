@@ -14,7 +14,7 @@ var (
 )
 
 // FileLogger 日志结构体
-type fileLogger struct {
+type FileLogger struct {
 	level     string
 	filePath  string
 	fileName  string
@@ -27,7 +27,7 @@ type fileLogger struct {
 }
 
 //LogMsg 定义日志信息结构体
-type logMsg struct {
+type LogMsg struct {
 	file    *os.File
 	errFile *os.File
 	level   string
@@ -35,11 +35,11 @@ type logMsg struct {
 }
 
 //定义日志通道
-var logChan = make(chan *logMsg, maxChanCount)
+var logChan = make(chan *LogMsg, maxChanCount)
 
 // NewFileLogger 日志结构体 构造函数
-func NewFileLogger(logCfg *LogCfg) (*fileLogger, error) {
-	fileLogger := &fileLogger{
+func NewFileLogger(logCfg *LogCfg) (*FileLogger, error) {
+	fileLogger := &FileLogger{
 		level:     logCfg.Level,
 		filePath:  logCfg.FilePath,
 		fileName:  logCfg.FileName,
@@ -52,7 +52,7 @@ func NewFileLogger(logCfg *LogCfg) (*fileLogger, error) {
 	_, err := os.Stat(logCfg.FilePath)
 	isExistFlag := err == nil || os.IsExist(err)
 	if !isExistFlag {
-		err := os.MkdirAll(logCfg.FilePath, 0744)
+		err = os.MkdirAll(logCfg.FilePath, 0744)
 		if err != nil {
 			return fileLogger, err
 		}
@@ -64,7 +64,7 @@ func NewFileLogger(logCfg *LogCfg) (*fileLogger, error) {
 }
 
 //新建日志文件
-func (f *fileLogger) initFile() error {
+func (f *FileLogger) initFile() error {
 	logName := path.Join(f.filePath, f.fileName)
 	fileObj, err := os.OpenFile(logName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
@@ -81,7 +81,7 @@ func (f *fileLogger) initFile() error {
 }
 
 //再次封装写日志函数
-func (f *fileLogger) wLog(level string, format string, args ...interface{}) {
+func (f *FileLogger) wLog(level string, format string, args ...interface{}) {
 	if getLevel(f.level) > getLevel(level) {
 		return
 	}
@@ -92,7 +92,7 @@ func (f *fileLogger) wLog(level string, format string, args ...interface{}) {
 	baseInfo := fmt.Sprintf("%s:%s [grn:%d] %s:%d [%s]", level, nowStr, runtime.NumGoroutine(), fileName, line, funcName)
 	msg := fmt.Sprintf(colorStr+" %s", baseInfo, msgInfo)
 	//将日志信息发送通道
-	logMsgTemp := &logMsg{
+	logMsgTemp := &LogMsg{
 		file:    f.file,
 		errFile: f.errFile,
 		level:   level,
@@ -108,7 +108,7 @@ func (f *fileLogger) wLog(level string, format string, args ...interface{}) {
 }
 
 // FileLog 将日志写入文件
-func (f *fileLogger) FileLog() {
+func (f *FileLogger) FileLog() {
 	defer f.file.Sync()
 	defer f.errFile.Sync()
 	for {
@@ -118,7 +118,7 @@ func (f *fileLogger) FileLog() {
 		case logMsg := <-logChan:
 			//将日志写入文件
 			_, _ = fmt.Fprintln(logMsg.file, logMsg.msg)
-			if getLevel(logMsg.level) >= getLevel("ERRO") {
+			if getLevel(logMsg.level) >= getLevel("ERROR") {
 				_, _ = fmt.Fprintln(logMsg.errFile, logMsg.msg)
 				switch getLevel(logMsg.level) {
 				case getLevel("FATAL"):
@@ -144,7 +144,7 @@ func reCrFile(file *os.File) *os.File {
 }
 
 //日志拆分
-func (f *fileLogger) checkSplitLog() {
+func (f *FileLogger) checkSplitLog() {
 	if f.splitFlag {
 		// 按时间拆分
 		timeD := time.Now().Sub(f.lastTime).Minutes()
@@ -169,41 +169,41 @@ func (f *fileLogger) checkSplitLog() {
 }
 
 // Debug 调试日志
-func (f *fileLogger) Debug(format string, args ...interface{}) {
+func (f *FileLogger) Debug(format string, args ...interface{}) {
 	f.wLog("DEBUG", format, args...)
 }
 
 // Info 一般日志
-func (f *fileLogger) Info(format string, args ...interface{}) {
+func (f *FileLogger) Info(format string, args ...interface{}) {
 	f.wLog("INFO", format, args...)
 }
 
 // Warn 警告日志
-func (f *fileLogger) Warn(format string, args ...interface{}) {
+func (f *FileLogger) Warn(format string, args ...interface{}) {
 	f.wLog("WARN", format, args...)
 }
 
 // Error 错误日志
-func (f *fileLogger) Error(format string, args ...interface{}) {
+func (f *FileLogger) Error(format string, args ...interface{}) {
 	f.wLog("ERRO", format, args...)
 }
 
 // Fatal 严重错误日志
-func (f *fileLogger) Fatal(format string, args ...interface{}) {
+func (f *FileLogger) Fatal(format string, args ...interface{}) {
 	f.wLog("FATAL", format, args...)
 }
 
-func (f *fileLogger) Panic(format string, args ...interface{}) {
+func (f *FileLogger) Panic(format string, args ...interface{}) {
 	f.wLog("PANIC", format, args...)
 }
 
-func (f *fileLogger) Print(args ...interface{}) {
+func (f *FileLogger) Print(args ...interface{}) {
 	s := fmt.Sprint(args...)
 	f.wLog("DEBUG", "%s", s)
 }
 
 // Close 关闭文件句柄
-func (f *fileLogger) Close() {
+func (f *FileLogger) Close() {
 	_ = f.file.Close()
 	_ = f.errFile.Close()
 }

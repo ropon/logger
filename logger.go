@@ -27,7 +27,7 @@ var (
 		"debug": 0,
 		"info":  1,
 		"warn":  2,
-		"erro":  3,
+		"error": 3,
 		"fatal": 4,
 		"panic": 5,
 	}
@@ -35,7 +35,7 @@ var (
 		"debug": Blue + "%s" + Reset,
 		"info":  Green + "%s" + Reset,
 		"warn":  Yellow + "%s" + Reset,
-		"erro":  Red + "%s" + Reset,
+		"error": Red + "%s" + Reset,
 		"fatal": RedBold + "%s" + Reset,
 		"panic": YellowBold + "%s" + Reset,
 	}
