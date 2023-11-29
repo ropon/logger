@@ -185,7 +185,7 @@ func (f *FileLogger) Warn(format string, args ...interface{}) {
 
 // Error 错误日志
 func (f *FileLogger) Error(format string, args ...interface{}) {
-	f.wLog("ERRO", format, args...)
+	f.wLog("ERROR", format, args...)
 }
 
 // Fatal 严重错误日志

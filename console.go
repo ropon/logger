@@ -26,8 +26,8 @@ func (f *ConsoleLogger) wLog(level string, format string, args ...interface{}) {
 	}
 	msgInfo := fmt.Sprintf(format, args...)
 	nowStr := time.Now().Format("2006-01-02 15:04:05.000")
-	funcName, fileName, line, _ := getCallerInfo(3)
-	logMsg := fmt.Sprintf("[%s] [%s] [%s:%s] %d %s", nowStr, level, fileName, funcName, line, msgInfo)
+	funcName, fileName, line, _ := getCallerInfo(4)
+	logMsg := fmt.Sprintf("%s:%s %s:%d [%s] %s", nowStr, level, fileName, line, funcName, msgInfo)
 	_, _ = fmt.Fprintln(os.Stdout, logMsg)
 }
 
