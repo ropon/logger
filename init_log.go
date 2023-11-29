@@ -1,6 +1,6 @@
 package logger
 
-var Log Logger
+var Log Logger = NewConsoleLogger("debug")
 
 type LogCfg struct {
 	Level     string  `json:"level"`
